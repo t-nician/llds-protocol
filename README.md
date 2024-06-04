@@ -2,7 +2,7 @@
 A UDP based networking protocol for transmitting & receiving data as quickly as possible for various purposes.
 > ⚠️☣️ **WARNING** I do not know what I'm doing 😎 ☣️⚠️
 
-<sup>I have no professional experience with the standards or terminiology of network protocols including handling sensitive data, this is an experimental project and is not safe for handling sensitive data.</sup>
+<sup>I have no professional experience with the standards or terminiology of network protocols including handling sensitive data, this is an experimental project and is not a safe solution.</sup>
 
 ## Goals 
 * Get it to work. 🚧
