@@ -10,7 +10,6 @@
 * File transfers with checksumming on completion. 🚧
 ---
 
-&nbsp;\
 I'm going to try and make clones of the client in other languages.\
 I might only have the server be in Rust since it works on any device\
 <sup> (as long as I setup the OS specific libraries and functions that would not exist in other OS's) </sup>
