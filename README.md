@@ -5,10 +5,10 @@
 
 ## Goals 
 * Get it to work. 🚧
-* Multi-client support on one data source.
-* Encryption support with a simple configuration change. 🚧
 * Easily setup a live video/media stream. 🚧
+* Multi-client support on one data source. 🚧
 * File transfers with checksumming on completion. 🚧
+* Encryption support with a simple configuration change. 🚧
 ---
 
 I'm going to try and make clones of the client in other languages.\
