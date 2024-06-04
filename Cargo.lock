@@ -3,5 +3,14 @@
 version = 3
 
 [[package]]
+name = "fletcher"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78b6ad5124f2e4d1ba8048f0366d3b5e7b3ff8ef55fb1f9d1b167c8e67181070"
+
+[[package]]
 name = "llds-protocol"
 version = "0.1.0"
+dependencies = [
+ "fletcher",
+]
