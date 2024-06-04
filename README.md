@@ -5,8 +5,9 @@
 
 ## Goals 
 * Get it to work. 🚧
+* Multi-client support on one data source.
 * Encryption support with a simple configuration change. 🚧
-* Quickly setup a live video/media stream with multi-client support. 🚧
+* Easily setup a live video/media stream. 🚧
 * File transfers with checksumming on completion. 🚧
 ---
 
