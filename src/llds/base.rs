@@ -1,4 +1,4 @@
-const DATA_SEPARATOR: [u64; 2] = [0x00, 0x00];
+const DATA_SEPARATOR: [u8; 2] = [0xFF, 0x00];
 const PACKET_VERSION: u8 = 1;
 
 
@@ -15,7 +15,7 @@ pub struct Packet {
     pub header: Vec<u8>, // packet header.
     pub payload: Vec<u8>, // packet payload.
     
-    pub encoded_packet: Vec<u8>, // packet header + payload.
+    pub encoded_packet: [u8; 512], // packet header + payload.
 }
 
 
@@ -32,7 +32,7 @@ impl Packet {
             header: Vec::new(),
             payload: payload,
 
-            encoded_packet: Vec::new()
+            encoded_packet: [0_u8; 512]
         };
 
         packet.update_packet();
@@ -69,9 +69,40 @@ impl Packet {
     }
 
 
-    pub fn encode(&mut self) -> &Vec<u8> {
-        
-        return &self.encoded_packet;
+    pub fn encode_for_socket(&mut self) -> [u8; 512] {
+        self.encoded_packet.fill(0);
+        self.update_packet();
+
+        let mut header_payload_vector = Vec::new();
+
+        header_payload_vector.append(&mut self.header);
+        header_payload_vector.append(&mut Vec::from(DATA_SEPARATOR));
+        header_payload_vector.append(&mut self.payload);
+        header_payload_vector.append(&mut Vec::from(DATA_SEPARATOR));
+
+        let header_payload_length = header_payload_vector.len();
+        let data_separator_length = DATA_SEPARATOR.len();
+
+        let mut header_index = 0;
+        let mut separator_index = 0;
+
+        self.encoded_packet.fill_with(
+            || { 
+                if header_index < header_payload_length {
+                    header_index += 1;
+                    return header_payload_vector[header_index - 1];
+                } else {
+                    if separator_index < data_separator_length {
+                        separator_index += 1;
+                        return DATA_SEPARATOR[separator_index - 1];
+                    } else {
+                        return DATA_SEPARATOR[data_separator_length - 1];
+                    }
+                }
+            }
+        );
+
+        return self.encoded_packet;
     }
 
     fn update_checksum(&mut self) {
@@ -102,5 +133,7 @@ impl Packet {
     fn update_packet(&mut self) {
         self.update_header();
         self.update_checksum();
+
+        //self.encoded_packet = self.header + DATA_SEPARATOR + self.payload + DATA_SEPARATOR;
     }
 }
