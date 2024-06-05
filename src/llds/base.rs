@@ -12,7 +12,7 @@ pub struct Packet {
     // header + DATA_SEPARATOR + payload + DATA_SEPARATOR.
     // end all payloads with DATA_SEPARATOR to confirm data integrity.
 
-    header: Vec<u8>, // packet header.
+    pub header: Vec<u8>, // packet header.
     pub payload: Vec<u8>, // packet payload.
     
     encoded_packet: Vec<u8>, // packet header + payload.
@@ -79,7 +79,12 @@ impl Packet {
     }
 
     fn update_header(&mut self) {
-        //self.header = self.id.to_ne_bytes().fill_with(self.desi.to_ne_bytes().fill_with(f))
+        self.header.clear();
+        
+        self.id.to_ne_bytes().map(|byte| self.header.push(byte));
+        self.desi.to_ne_bytes().map(|byte| self.header.push(byte));
+        self.version.to_ne_bytes().map(|byte| self.header.push(byte));
+
     }
 
     fn update_packet(&mut self) {

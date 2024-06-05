@@ -10,7 +10,7 @@ fn main() {
         Vec::from((5318008_u32).to_ne_bytes()), // data
     );
 
-    println!("{:?}", test.payload);
+    println!("{:?}", test.header);
     println!("Hello!");
 
     // sure it 'works' but uhh, the packet is invalid. same with how im making the one with vec.
