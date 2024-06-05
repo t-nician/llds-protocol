@@ -15,10 +15,10 @@ pub struct Packet {
 
 
 impl Packet {
-    pub fn new() -> Packet {
+    pub fn new(id: u8, desi: u8, version: u8, checksum: u16) -> Packet {
         Packet {
-            id: 0,
-            desi: 0,
+            id: id.unwrap_or(0),
+            desi: desi.unwrap(),
             version: PACKET_VERSION,
             checksum: 0,
 
@@ -28,22 +28,37 @@ impl Packet {
         }
     }
 
-    
-    pub fn from_buffer(data: [u8; 4096]) -> Result<Packet, &'static str> {
-        Some(Packet::new());
+
+    pub fn from_buffer(data: [u8; 512]) -> Result<Packet, &'static str> {
+        Some(
+            Packet::new(
+                1 as u8, // id
+                1 as u8, // desi
+                1 as u8, // version
+                1 as u16, // checksum
+            )
+        );
 
         return Err("Something unexpected happened.");
     }
 
 
     pub fn from_vector(data: Vec<u8>) -> Result<Packet, &'static str> {
-        Some(Packet::new());
+        Some(
+            Packet::new(
+                1 as u8, // id
+                1 as u8, // desi
+                1 as u8, // version
+                1 as u16, // checksum
+            )
+        );
 
         return Err("Something unexpected happened.");
     }
 
 
-    pub fn encode(&mut self) {
-
+    pub fn encode(&mut self) -> &Vec<u8> {
+        
+        return &self.encoded_packet;
     }
 }
