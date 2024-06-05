@@ -3,14 +3,19 @@ const PACKET_VERSION: u8 = 1;
 
 
 pub struct Packet {
-    id: u8,
-    desi: u8,
-    version: u8,
-    checksum: u16, // fletcher-16
+    id: u8, // 1 byte
+    desi: u8, // 1 byte
+    version: u8, // 1 byte
+    checksum: u16, // 2 bytes fletcher-16
 
-    encoded_headers: Vec<u8>, // packet headers.
+    // Currently the header is 5 bytes long.
+    // header + DATA_SEPARATOR + payload + DATA_SEPARATOR.
+    // end all payloads with DATA_SEPARATOR to confirm data integrity.
+
+    encoded_header: Vec<u8>, // packet header.
     encoded_payload: Vec<u8>, // packet payload.
-    encoded_packet: Vec<u8>, // packet header + payload
+    
+    encoded_packet: Vec<u8>, // packet header + payload.
 }
 
 
@@ -19,11 +24,13 @@ impl Packet {
         Packet {
             id: id,
             desi: desi,
-            version: if version == 0 { PACKET_VERSION } else { version },
-            checksum: 0,
+            checksum: checksum,
 
-            encoded_headers: Vec::new(),
+            version: if version == 0 { PACKET_VERSION } else { version },
+
+            encoded_header: Vec::new(),
             encoded_payload: Vec::new(),
+
             encoded_packet: Vec::new()
         }
     }
