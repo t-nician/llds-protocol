@@ -12,60 +12,78 @@ pub struct Packet {
     // header + DATA_SEPARATOR + payload + DATA_SEPARATOR.
     // end all payloads with DATA_SEPARATOR to confirm data integrity.
 
-    encoded_header: Vec<u8>, // packet header.
-    encoded_payload: Vec<u8>, // packet payload.
+    header: Vec<u8>, // packet header.
+    pub payload: Vec<u8>, // packet payload.
     
     encoded_packet: Vec<u8>, // packet header + payload.
 }
 
 
 impl Packet {
-    pub fn new(id: u8, desi: u8, version: u8, checksum: u16) -> Packet {
-        Packet {
+    pub fn new(id: u8, desi: u8, version: u8, payload: Vec<u8>) -> Packet {
+        let mut packet = Packet {
             id: id,
             desi: desi,
-            checksum: checksum,
+            checksum: 0,
+            
 
             version: if version == 0 { PACKET_VERSION } else { version },
 
-            encoded_header: Vec::new(),
-            encoded_payload: Vec::new(),
+            header: Vec::new(),
+            payload: payload,
 
             encoded_packet: Vec::new()
-        }
+        };
+
+        packet.update_packet();
+
+        return packet;
     }
 
 
-    pub fn from_buffer(data: [u8; 512]) -> Result<Packet, &'static str> {
-        Some(
+    pub fn from_buffer(buffer: [u8; 512]) -> Result<Packet, &'static str> {
+        return Ok(
             Packet::new(
                 1 as u8, // id
                 1 as u8, // desi
                 1 as u8, // version
-                1 as u16, // checksum
+                Vec::from(buffer), // data
             )
         );
 
-        return Err("Something unexpected happened.");
+        //return Err("Something unexpected happened.");
     }
 
 
-    pub fn from_vector(data: Vec<u8>) -> Result<Packet, &'static str> {
-        Some(
+    pub fn from_vector(vector: Vec<u8>) -> Result<Packet, &'static str> {
+        return Ok(
             Packet::new(
                 1 as u8, // id
                 1 as u8, // desi
                 1 as u8, // version
-                1 as u16, // checksum
+                vector, // data
             )
         );
 
-        return Err("Something unexpected happened.");
+        //return Err("Something unexpected happened.");
     }
 
 
     pub fn encode(&mut self) -> &Vec<u8> {
         
         return &self.encoded_packet;
+    }
+
+    fn update_checksum(&mut self) {
+
+    }
+
+    fn update_header(&mut self) {
+        //self.header = self.id.to_ne_bytes().fill_with(self.desi.to_ne_bytes().fill_with(f))
+    }
+
+    fn update_packet(&mut self) {
+        self.update_header();
+        self.update_checksum();
     }
 }
