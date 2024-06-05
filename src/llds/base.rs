@@ -17,9 +17,9 @@ pub struct Packet {
 impl Packet {
     pub fn new(id: u8, desi: u8, version: u8, checksum: u16) -> Packet {
         Packet {
-            id: id.unwrap_or(0),
-            desi: desi.unwrap(),
-            version: PACKET_VERSION,
+            id: id,
+            desi: desi,
+            version: if version == 0 { PACKET_VERSION } else { version },
             checksum: 0,
 
             encoded_headers: Vec::new(),
