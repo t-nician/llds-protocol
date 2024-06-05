@@ -3,10 +3,10 @@ const PACKET_VERSION: u8 = 1;
 
 
 pub struct Packet {
-    id: u8, // 1 byte
-    desi: u8, // 1 byte
-    version: u8, // 1 byte
-    checksum: u16, // 2 bytes fletcher-16
+    pub id: u8, // 1 byte
+    pub desi: u8, // 1 byte
+    pub version: u8, // 1 byte
+    pub checksum: u16, // 2 bytes fletcher-16
 
     // Currently the header is 5 bytes long.
     // header + DATA_SEPARATOR + payload + DATA_SEPARATOR.
@@ -15,7 +15,7 @@ pub struct Packet {
     pub header: Vec<u8>, // packet header.
     pub payload: Vec<u8>, // packet payload.
     
-    encoded_packet: Vec<u8>, // packet header + payload.
+    pub encoded_packet: Vec<u8>, // packet header + payload.
 }
 
 
