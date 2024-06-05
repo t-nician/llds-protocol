@@ -21,6 +21,22 @@ pub struct Packet {
 
 impl Packet {
     pub fn new(id: u8, desi: u8, version: u8, payload: Vec<u8>, checksum: u16) -> Packet {
+        let mut new_payload = Vec::new();
+        let mut separator_index = 0;
+
+        for index in 0..512 {
+            if index < payload.len() - 1 {
+                new_payload.push(payload[index])
+            } else {
+                if separator_index < DATA_SEPARATOR.len() - 1 {
+                    separator_index += 1;
+                    new_payload.push(DATA_SEPARATOR[separator_index - 1]);
+                } else {
+                    new_payload.push(DATA_SEPARATOR[separator_index]);
+                }
+            }
+        }
+
         let mut packet = Packet {
             id: id,
             desi: desi,
@@ -30,7 +46,7 @@ impl Packet {
             version: if version == 0 { PACKET_VERSION } else { version },
 
             header: Vec::new(),
-            payload: payload,
+            payload: new_payload,
 
             encoded_packet: [0_u8; 512]
         };
@@ -45,33 +61,19 @@ impl Packet {
         let id = buffer[0];
         let desi = buffer[1];
         let version = buffer[2];
+
         let mut checksum = [0_u8; 2];
+        let mut payload = [0; 507];
 
-        let mut buffer_index = 3;
-        let mut payload = Vec::new();
-
-        checksum.fill_with(
-            || { 
-                if buffer_index < 4 {
-                    buffer_index += 1;
-                    return buffer[buffer_index - 1];
-                } else {
-                    return buffer[buffer_index];
-                }
-            }
-        );
-
-
-        for index in 5..512 {
-            payload.insert(payload.len(), buffer[index].clone());
-        }
+        payload.copy_from_slice(&buffer[5..512]);
+        checksum.copy_from_slice(&buffer[3..5]);
 
         return Ok(
             Packet::new(
                 id, // id
                 desi, // desi
                 version, // version
-                payload, // data,
+                Vec::from(payload), // data,
                 u16::from_ne_bytes(checksum)
             )
         );
@@ -162,9 +164,14 @@ impl Packet {
         if self.checksum != 0 {
             let mut fletcher = fletcher::Fletcher16::new();
 
+            println!("header {:?}", self.header);
+            println!("payload {:?}", self.payload);
+
             fletcher.update(&self.header);
             fletcher.update(&self.payload);
 
+            println!("fletched value {:?}", fletcher.value());
+            
             if self.checksum != fletcher.value() {
                 panic!("This packet was created from a buffer and failed it's checksum! Something is wrong!");
             }
