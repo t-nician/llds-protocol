@@ -20,11 +20,11 @@ pub struct Packet {
 
 
 impl Packet {
-    pub fn new(id: u8, desi: u8, version: u8, payload: Vec<u8>) -> Packet {
+    pub fn new(id: u8, desi: u8, version: u8, payload: Vec<u8>, checksum: u16) -> Packet {
         let mut packet = Packet {
             id: id,
             desi: desi,
-            checksum: 0,
+            checksum: checksum,
             
 
             version: if version == 0 { PACKET_VERSION } else { version },
@@ -42,12 +42,37 @@ impl Packet {
 
 
     pub fn from_buffer(buffer: [u8; 512]) -> Result<Packet, &'static str> {
+        let id = buffer[0];
+        let desi = buffer[1];
+        let version = buffer[2];
+        let mut checksum = [0_u8; 2];
+
+        let mut buffer_index = 3;
+        let mut payload = Vec::new();
+
+        checksum.fill_with(
+            || { 
+                if buffer_index < 4 {
+                    buffer_index += 1;
+                    return buffer[buffer_index - 1];
+                } else {
+                    return buffer[buffer_index];
+                }
+            }
+        );
+
+
+        for index in 5..512 {
+            payload.insert(payload.len(), buffer[index].clone());
+        }
+
         return Ok(
             Packet::new(
-                1 as u8, // id
-                1 as u8, // desi
-                1 as u8, // version
-                Vec::from(buffer), // data
+                id, // id
+                desi, // desi
+                version, // version
+                payload, // data,
+                u16::from_ne_bytes(checksum)
             )
         );
 
@@ -61,7 +86,8 @@ impl Packet {
                 1 as u8, // id
                 1 as u8, // desi
                 1 as u8, // version
-                vector, // data
+                vector, // data,
+                0
             )
         );
 
@@ -132,6 +158,18 @@ impl Packet {
 
     fn update_packet(&mut self) {
         self.update_header();
+
+        if self.checksum != 0 {
+            let mut fletcher = fletcher::Fletcher16::new();
+
+            fletcher.update(&self.header);
+            fletcher.update(&self.payload);
+
+            if self.checksum != fletcher.value() {
+                panic!("This packet was created from a buffer and failed it's checksum! Something is wrong!");
+            }
+        }
+
         self.update_checksum();
 
         //self.encoded_packet = self.header + DATA_SEPARATOR + self.payload + DATA_SEPARATOR;
