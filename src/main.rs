@@ -12,7 +12,4 @@ fn main() {
 
     println!("{:?}", test.header);
     println!("Hello!");
-
-    // sure it 'works' but uhh, the packet is invalid. same with how im making the one with vec.
-    println!("{:?}", Packet::from_buffer([32_u8; 512]).unwrap().payload)
 }

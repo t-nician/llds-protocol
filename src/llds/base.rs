@@ -76,6 +76,18 @@ impl Packet {
 
     fn update_checksum(&mut self) {
 
+        let mut new_checksum = fletcher::Fletcher16::new();
+
+        new_checksum.update(&self.header as &[u8]);
+        new_checksum.update(&self.payload as &[u8]);
+
+        self.checksum = new_checksum.value();
+
+        if self.header.len() != 3 {
+            self.update_header();
+        }
+
+        self.checksum.to_ne_bytes().map(|byte| self.header.push(byte));
     }
 
     fn update_header(&mut self) {
