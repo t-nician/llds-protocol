@@ -4,13 +4,15 @@ use llds::base::{ Packet };
 
 fn main() {
     let mut packet = Packet::new(
-        0,
-        0
+        155,
+        23
     );
 
     packet.write_string_to_payload(
         &String::from("Hello thereee!")
     );
 
-    println!("{:?}", packet.payload);
+    packet.write_packet_to_buffer();
+
+    println!("{:?}", packet.buffer);
 }
