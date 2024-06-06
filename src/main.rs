@@ -14,5 +14,5 @@ fn main() {
 
     packet.write_packet_to_buffer();
 
-    println!("{:?}", packet.buffer);
+    println!("{:?}", packet.header);
 }

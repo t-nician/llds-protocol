@@ -51,41 +51,37 @@ impl Packet {
     pub fn write_packet_to_buffer(&mut self) {
         self.buffer.fill(0);
 
-        let mut buffer_index = 0;
-        let mut cursor = &mut self.buffer[1..];
+        let checksum = self.generate_checksum();
+
+        let mut buffer_cursor = &mut self.buffer[..];
+        let mut header_cursor = &mut self.header[..];
 
         // A better way to do this I bet. :D
         // NOTE this has to be done in this order.
 
-        cursor.write(&self.version.to_ne_bytes()).unwrap();
+        header_cursor.write(&self.version.to_be_bytes()).unwrap();
 
-        /*self.version.to_ne_bytes().map(|byte| { 
-            buffer_index += 1; self.buffer[buffer_index - 1] = byte;
-        });*/
+        header_cursor.write(&self.channel.to_be_bytes()).unwrap();
 
-        self.channel.to_ne_bytes().map(|byte| {
-            buffer_index += 1; self.buffer[buffer_index - 1] = byte;
-        });
+        header_cursor.write(&self.id.to_be_bytes()).unwrap();
 
-        self.id.to_ne_bytes().map(|byte| {
-            buffer_index += 1; self.buffer[buffer_index - 1] = byte;
-        });
+        header_cursor.write(&checksum.to_be_bytes()).unwrap();
 
-        self.generate_checksum().to_ne_bytes().map(|byte| {
-            buffer_index += 1; self.buffer[buffer_index - 1] = byte;
-        });
+        // Write the header to the buffer!
+
+        buffer_cursor.write(&self.header).unwrap();
 
         // Always add the separator when the header is complete.
 
-        DATA_SEPARATOR.to_ne_bytes().map(|byte| {
-            buffer_index += 1; self.buffer[buffer_index - 1] = byte;
-        });
+        buffer_cursor.write(&DATA_SEPARATOR.to_be_bytes()).unwrap();
 
         // Now for the payload!
 
-        self.payload.map(|byte| {
+        buffer_cursor.write(&self.payload).unwrap();
+
+        /*self.payload.map(|byte| {
             buffer_index += 1; self.buffer[buffer_index - 1] = byte;
-        });
+        });*/
 
         //self.buffer.as_slice().clone_from_slice(cursor);
         //self.buffer = cursor;
