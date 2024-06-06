@@ -42,35 +42,31 @@ impl Packet {
         let mut u8_buffer = [0u8; 1];
         let mut u16_buffer = [0u8; 2];
 
+        let mut buffer_u8_from_be_bytes = |header_index: usize| {
+            u8_buffer[0] = buffer[header_index];
+            packet.header[header_index] = buffer[header_index];
+            return u8::from_be_bytes(u8_buffer);
+        };
+
+        let mut buffer_u16_from_be_bytes = |buffer_start_index: usize| {
+            for offset in 0..1 {
+                u16_buffer[offset] = buffer[buffer_start_index + offset];
+            }   
+
+            return u16::from_be_bytes(u16_buffer);
+        };
+
         // u8 headers
-
-        u8_buffer[0] = buffer[0];
-        packet.header[0] = u8_buffer[0];
-        packet.version = u8::from_be_bytes(u8_buffer);
-
-        u8_buffer[0] = buffer[1];
-        packet.header[1] = u8_buffer[0];
-        packet.channel = u8::from_be_bytes(u8_buffer);
-
-        u8_buffer[0] = buffer[2];
-        packet.header[2] = u8_buffer[0];
-        packet.id = u8::from_be_bytes(u8_buffer);
+        packet.version = buffer_u8_from_be_bytes(0);
+        packet.channel = buffer_u8_from_be_bytes(1);
+        packet.id = buffer_u8_from_be_bytes(2);
 
         // u16 header
-
-        u16_buffer[0] = buffer[3];
-        packet.header[3] = u16_buffer[0];
-        u16_buffer[1] = buffer[4];
-        packet.header[4] = u16_buffer[1];
-
-        packet.checksum = u16::from_be_bytes(u16_buffer);
-
-        let mut buffer_index = 0;
-
-        buffer.map(|byte| {
-            packet.buffer[buffer_index] = byte;
-            buffer_index += 1;
-        });
+        packet.checksum = buffer_u16_from_be_bytes(3);
+        
+        for (index, value) in buffer.iter().enumerate() {
+            packet.buffer[index] = value.clone();
+        }
 
         return packet;
     }
@@ -98,7 +94,7 @@ impl Packet {
         let checksum = self.generate_checksum();
 
         let mut header_cursor = &mut self.header[..];
-        
+
         // NOTE this has to be done in this order.
 
         header_cursor.write(&self.version.to_be_bytes()).unwrap();
