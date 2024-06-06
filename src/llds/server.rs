@@ -6,6 +6,7 @@ use std::net::UdpSocket;
 
 
 pub struct Server {
+    callback: Box<dyn Fn(&Packet, &mut Packet) + 'static>,
     socket: UdpSocket,
     host: String,
     port: u16,
@@ -22,12 +23,19 @@ impl Server {
         Server {
             host: host,
             port: port,
-            socket: UdpSocket::bind(address).unwrap()
+            socket: UdpSocket::bind(address).unwrap(),
+            callback: Box::new(|_, _|{})
         }
     }
 
 
-    pub fn start<F>(&mut self, callback: F) where F: Fn(&Packet, &mut Packet) {
+    pub fn on<F>(&mut self, callback: F) where F: Fn(&Packet, &mut Packet) + 'static {
+        self.callback = Box::from(callback);
+    }
+
+
+    pub fn start(&mut self){
+
         loop {
             let mut recv_packet = Packet::new(0, 0);
             let mut resp_packet = Packet::new(0, 0);
@@ -37,7 +45,7 @@ impl Server {
             recv_packet.load_packet_from_buffer();
 
             // TODO ready packet payload, run func, pass resp_packet buffer or whole packet.
-            callback(&recv_packet, &mut resp_packet);
+            self.callback.as_ref()(&recv_packet, &mut resp_packet);
 
             resp_packet.write_packet_to_buffer();
             
