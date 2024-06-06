@@ -124,6 +124,8 @@ impl Packet {
         if !self.packet_checksum_valid() {
             panic_ready("Packet failed checksum!");
         }
+
+        self.write_packet_to_header();
     }
 
 

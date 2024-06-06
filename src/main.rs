@@ -16,7 +16,7 @@ fn main() {
         );
 
         server.on(|received_packet: &Packet, response_packet: &mut Packet| {
-            println!("Received: {:?}", received_packet.payload);
+            println!("Received: {:?}", received_packet.header);
 
             response_packet.write_string_to_payload(
                 &String::from("Server response!")
@@ -35,15 +35,15 @@ fn main() {
 
         let mut client = Client::new("127.0.0.1".to_string());
         let mut packet = Packet::new(5, 32);
-        
+
         packet.write_string_to_payload(&"hello world!".to_string());
         packet.write_packet_to_buffer();
 
-        println!("Sending packet data!");
+        println!("Sending packet data! {:?}", packet.header);
 
-        let response = client.send_packet("127.0.0.1:8000".to_string(),&packet);
+        let response = client.send_packet("127.0.0.1:8000".to_string(), &packet);
         
-        println!("Response from server to client! {:?}", response.payload);
+        println!("Response from server to client! {:?}", response.header);
     });
 
     println!("Hanging before closing.");

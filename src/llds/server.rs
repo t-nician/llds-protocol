@@ -45,6 +45,9 @@ impl Server {
             recv_packet.load_packet_from_buffer();
 
             // TODO ready packet payload, run func, pass resp_packet buffer or whole packet.
+            resp_packet.channel = recv_packet.channel;
+            resp_packet.id = recv_packet.id;
+
             self.callback.as_ref()(&recv_packet, &mut resp_packet);
 
             resp_packet.write_packet_to_buffer();
