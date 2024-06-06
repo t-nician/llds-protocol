@@ -26,7 +26,7 @@ fn main() {
         server.start();
     });
 
-    thread::sleep(Duration::from_secs(2));
+    thread::sleep(Duration::from_secs(1));
 
     println!("Starting client...");
 
@@ -45,6 +45,8 @@ fn main() {
         
         println!("Response from server to client! {:?}", response.header);
     });
+
+    thread::sleep(Duration::from_secs(1));
 
     println!("Hanging before closing.");
 
