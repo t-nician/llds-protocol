@@ -46,27 +46,23 @@ impl Packet {
 
         u8_buffer[0] = buffer[0];
         packet.header[0] = u8_buffer[0];
-
         packet.version = u8::from_be_bytes(u8_buffer);
 
         u8_buffer[0] = buffer[1];
         packet.header[1] = u8_buffer[0];
-
         packet.channel = u8::from_be_bytes(u8_buffer);
 
         u8_buffer[0] = buffer[2];
         packet.header[2] = u8_buffer[0];
-
         packet.id = u8::from_be_bytes(u8_buffer);
 
         // u16 header
 
         u16_buffer[0] = buffer[3];
         packet.header[3] = u16_buffer[0];
-
         u16_buffer[1] = buffer[4];
         packet.header[4] = u16_buffer[1];
-        
+
         packet.checksum = u16::from_be_bytes(u16_buffer);
 
         let mut buffer_index = 0;
@@ -102,8 +98,7 @@ impl Packet {
         let checksum = self.generate_checksum();
 
         let mut header_cursor = &mut self.header[..];
-
-         // A better way to do this I bet. :D
+        
         // NOTE this has to be done in this order.
 
         header_cursor.write(&self.version.to_be_bytes()).unwrap();
