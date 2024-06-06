@@ -14,5 +14,7 @@ fn main() {
 
     packet.write_packet_to_buffer();
 
-    println!("{:?}", packet.header);
+    let packet_from_buffer = Packet::from_buffer(&packet.buffer);
+
+    println!("{:?}", packet_from_buffer.buffer);
 }

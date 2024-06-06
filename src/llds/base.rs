@@ -13,6 +13,8 @@ pub struct Packet {
     pub header: [u8; 5],
     pub payload: [u8; 506],
 
+    pub checksum: u16,
+
     pub buffer: [u8; 512],
 }
 
@@ -27,36 +29,81 @@ impl Packet {
             header: [0u8; 5],
             payload: [0u8; 506],
 
+            checksum: 0,
+
             buffer: [0u8; 512]
         }
     }
 
+
+    pub fn from_buffer(buffer: &[u8; 512]) -> Packet {
+        let mut packet = Packet::new(0, 0);
+        
+        let mut u8_buffer = [0u8; 1];
+        let mut u16_buffer = [0u8; 2];
+
+        // u8 headers
+
+        u8_buffer[0] = buffer[0];
+        packet.header[0] = u8_buffer[0];
+
+        packet.version = u8::from_be_bytes(u8_buffer);
+
+        u8_buffer[0] = buffer[1];
+        packet.header[1] = u8_buffer[0];
+
+        packet.channel = u8::from_be_bytes(u8_buffer);
+
+        u8_buffer[0] = buffer[2];
+        packet.header[2] = u8_buffer[0];
+
+        packet.id = u8::from_be_bytes(u8_buffer);
+
+        // u16 header
+
+        u16_buffer[0] = buffer[3];
+        packet.header[3] = u16_buffer[0];
+
+        u16_buffer[1] = buffer[4];
+        packet.header[4] = u16_buffer[1];
+        
+        packet.checksum = u16::from_be_bytes(u16_buffer);
+
+        let mut buffer_index = 0;
+
+        buffer.map(|byte| {
+            packet.buffer[buffer_index] = byte;
+            buffer_index += 1;
+        });
+
+        return packet;
+    }
+
+
     pub fn generate_checksum(&self) -> u16 {
         let mut checksum = fletcher::Fletcher16::new();
+
         checksum.update(&self.payload);
+
         return checksum.value();
     }
 
+
     pub fn write_string_to_payload(&mut self, string: &String) {
-        let payload_len = self.payload.len();
-        for (index, byte) in string.bytes().enumerate() {
-            if index < payload_len {
-                self.payload[index] = byte;
-            } else {
-                panic!("YOUR STRING IS TOO BIG OMGG!");
-            }
-        }
+        self.payload.fill(0);
+
+        let mut payload_cursor = &mut self.payload[..];
+
+        payload_cursor.write(string.as_bytes()).unwrap();
     }
 
-    pub fn write_packet_to_buffer(&mut self) {
-        self.buffer.fill(0);
 
+    pub fn write_packet_to_header(&mut self) {
         let checksum = self.generate_checksum();
 
-        let mut buffer_cursor = &mut self.buffer[..];
         let mut header_cursor = &mut self.header[..];
 
-        // A better way to do this I bet. :D
+         // A better way to do this I bet. :D
         // NOTE this has to be done in this order.
 
         header_cursor.write(&self.version.to_be_bytes()).unwrap();
@@ -66,6 +113,14 @@ impl Packet {
         header_cursor.write(&self.id.to_be_bytes()).unwrap();
 
         header_cursor.write(&checksum.to_be_bytes()).unwrap();
+    }
+
+
+    pub fn write_packet_to_buffer(&mut self) {
+        self.write_packet_to_header();
+        self.buffer.fill(0);
+
+        let mut buffer_cursor = &mut self.buffer[..];
 
         // Write the header to the buffer!
 
@@ -78,13 +133,5 @@ impl Packet {
         // Now for the payload!
 
         buffer_cursor.write(&self.payload).unwrap();
-
-        /*self.payload.map(|byte| {
-            buffer_index += 1; self.buffer[buffer_index - 1] = byte;
-        });*/
-
-        //self.buffer.as_slice().clone_from_slice(cursor);
-        //self.buffer = cursor;
-
     }
 }
