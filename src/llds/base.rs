@@ -51,6 +51,14 @@ impl Packet {
         return packet;
     }
 
+    
+    pub fn create_response_packet(&self) -> Packet {
+        return Packet::new(
+            self.id,
+            self.channel
+        );
+    }
+
 
     pub fn generate_checksum(&self) -> u16 {
         let mut checksum = fletcher::Fletcher16::new();
@@ -96,9 +104,10 @@ impl Packet {
 
         payload_cursor.write(&self.buffer[payload_offset..]).unwrap();
 
-        if !self.packet_checksum_valid() {
+        let panic_ready = |reason: &str| {
             panic!(
-                "Packet failed checksum!\nPacket Version: {:?}\nPacket Channel: {:?}\nPacket Id: {:?}\nReceived Checksum: {:?}\nGenerated Checksum: {:?}\nPacket Buffer: {:?}",
+                "{:?}\nPacket Version: {:?}\nPacket Channel: {:?}\nPacket Id: {:?}\nReceived Checksum: {:?}\nGenerated Checksum: {:?}\nPacket Buffer: {:?}",
+                reason,
                 self.version,
                 self.channel,
                 self.id,
@@ -106,6 +115,14 @@ impl Packet {
                 self.generate_checksum(),
                 self.buffer
             )
+        };
+
+        if self.version != CURRENT_PACKET_VERSION {
+            panic_ready("Wrong packet version!");
+        }
+
+        if !self.packet_checksum_valid() {
+            panic_ready("Packet failed checksum!");
         }
     }
 
