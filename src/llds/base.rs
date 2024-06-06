@@ -42,9 +42,9 @@ impl Packet {
         let mut u8_buffer = [0u8; 1];
         let mut u16_buffer = [0u8; 2];
 
-        let mut buffer_u8_from_be_bytes = |header_index: usize| {
-            u8_buffer[0] = buffer[header_index];
-            packet.header[header_index] = buffer[header_index];
+        let mut buffer_u8_from_be_bytes = |buffer_index: usize| {
+            u8_buffer[0] = buffer[buffer_index];
+            packet.header[buffer_index] = buffer[buffer_index];
             return u8::from_be_bytes(u8_buffer);
         };
 
