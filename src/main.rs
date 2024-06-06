@@ -1,8 +1,5 @@
 mod llds;
 
-use llds::base::Packet;
-use llds::server::Server;
-
 use std::thread;
 use std::time::Duration;
 
@@ -11,12 +8,14 @@ fn main() {
     println!("Starting server...");
 
     thread::spawn(|| {
+        use llds::server::{Server, Packet};
+
         let mut server = Server::new(
             "127.0.0.1".to_string(),
             8000
         );
 
-        server.on(|received_packet, response_packet| {
+        server.on(|received_packet: &Packet, response_packet: &mut Packet| {
             println!("Received: {:?}", received_packet.payload);
 
             response_packet.write_string_to_payload(
@@ -29,11 +28,22 @@ fn main() {
 
     thread::sleep(Duration::from_secs(2));
 
-
     println!("Starting client...");
 
     thread::spawn(|| {
+        use llds::client::{Client, Packet};
+
+        let mut client = Client::new("127.0.0.1".to_string());
+        let mut packet = Packet::new(5, 32);
         
+        packet.write_string_to_payload(&"hello world!".to_string());
+        packet.write_packet_to_buffer();
+
+        println!("Sending packet data!");
+
+        let response = client.send_packet("127.0.0.1:8000".to_string(),&packet);
+        
+        println!("Response from server to client! {:?}", response.payload);
     });
 
     println!("Hanging before closing.");

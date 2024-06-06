@@ -8,3 +8,4 @@ description = "A UDP based networking protocol for transmitting & receiving data
 
 [dependencies]
 fletcher={version = "0.3.0"}
+rand={version = "0.8.5"}

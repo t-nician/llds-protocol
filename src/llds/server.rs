@@ -1,7 +1,7 @@
 #[path="base.rs"]
 mod base;
 
-use base::Packet;
+pub use base::Packet;
 use std::net::UdpSocket;
 
 
