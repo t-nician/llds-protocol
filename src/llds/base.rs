@@ -21,7 +21,7 @@ pub struct Packet {
 
 impl Packet {
     pub fn new(id: u8, channel: u8) -> Packet {
-        Packet {
+        let mut packet = Packet {
             version: CURRENT_PACKET_VERSION,
             channel: channel,
             id: id,
@@ -32,39 +32,22 @@ impl Packet {
             checksum: 0,
 
             buffer: [0u8; 512]
-        }
+        };
+
+        packet.write_packet_to_buffer();
+
+        return packet;
     }
 
 
     pub fn from_buffer(buffer: &[u8; 512]) -> Packet {
         let mut packet = Packet::new(0, 0);
-        
-        let mut u8_buffer = [0u8; 1];
-        let mut u16_buffer = [0u8; 2];
-
-        let mut buffer_u8_from_be_bytes = |buffer_index: usize| {
-            u8_buffer[0] = buffer[buffer_index];
-            packet.header[buffer_index] = buffer[buffer_index];
-            return u8::from_be_bytes(u8_buffer);
-        };
-
-        let mut buffer_u16_from_be_bytes = |buffer_index: usize| {
-            u16_buffer[0] = buffer[buffer_index];
-            u16_buffer[1] = buffer[buffer_index + 1];
-            return u16::from_be_bytes(u16_buffer);
-        };
-
-        // u8 headers
-        packet.version = buffer_u8_from_be_bytes(0);
-        packet.channel = buffer_u8_from_be_bytes(1);
-        packet.id = buffer_u8_from_be_bytes(2);
-
-        // u16 header
-        packet.checksum = buffer_u16_from_be_bytes(3);
 
         for (index, value) in buffer.iter().enumerate() {
             packet.buffer[index] = value.clone();
         }
+
+        packet.load_packet_from_buffer();
 
         return packet;
     }
@@ -76,6 +59,55 @@ impl Packet {
         checksum.update(&self.payload);
 
         return checksum.value();
+    }
+
+    
+    pub fn packet_checksum_valid(&self) -> bool {
+        return self.checksum == self.generate_checksum();
+    }
+
+
+    pub fn load_packet_from_buffer(&mut self) {
+        let mut u8_buffer = [0u8; 1];
+        let mut u16_buffer = [0u8; 2];
+
+        let mut buffer_u8_from_be_bytes = |buffer_index: usize| {
+            u8_buffer[0] = self.buffer[buffer_index];
+            return u8::from_be_bytes(u8_buffer);
+        };
+
+        let mut buffer_u16_from_be_bytes = |buffer_index: usize| {
+            u16_buffer[0] = self.buffer[buffer_index];
+            u16_buffer[1] = self.buffer[buffer_index + 1];
+            return u16::from_be_bytes(u16_buffer);
+        };
+
+        // u8 headers
+        self.version = buffer_u8_from_be_bytes(0);
+        self.channel = buffer_u8_from_be_bytes(1);
+        self.id = buffer_u8_from_be_bytes(2);
+
+        // u16 header
+        self.checksum = buffer_u16_from_be_bytes(3);
+
+        let payload_len = self.payload.len();
+        let payload_offset = 512 - payload_len;
+
+        for index in 0..payload_len {
+            self.payload[index] = self.buffer[index + payload_offset];
+        }
+
+        if !self.packet_checksum_valid() {
+            panic!(
+                "Packet failed checksum!\nPacket Version: {:?}\nPacket Channel: {:?}\nPacket Id: {:?}\nReceived Checksum: {:?}\nGenerated Checksum: {:?}\nPacket Buffer: {:?}",
+                self.version,
+                self.channel,
+                self.id,
+                self.checksum,
+                self.generate_checksum(),
+                self.buffer
+            )
+        }
     }
 
 
@@ -107,6 +139,7 @@ impl Packet {
 
     pub fn write_packet_to_buffer(&mut self) {
         self.write_packet_to_header();
+
         self.buffer.fill(0);
 
         let mut buffer_cursor = &mut self.buffer[..];
