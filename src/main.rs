@@ -11,14 +11,18 @@ fn main() {
     println!("Starting server...");
 
     thread::spawn(|| {
-        let server = Server::new(
+        let mut server = Server::new(
             "127.0.0.1".to_string(),
             8000
         );
 
-        
+        server.start(|received_packet, response_packet| {
+            println!("Received: {:?}", received_packet.payload);
 
-        server.start();
+            response_packet.write_string_to_payload(
+                &String::from("Server response!")
+            );
+        });
     });
 
     thread::sleep(Duration::from_secs(2));

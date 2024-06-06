@@ -1,8 +1,8 @@
 #[path="base.rs"]
 mod base;
 
-use base::{ Packet };
-use std::net::{ UdpSocket };
+use base::Packet;
+use std::net::UdpSocket;
 
 
 pub struct Server {
@@ -22,12 +22,12 @@ impl Server {
         Server {
             host: host,
             port: port,
-            socket: UdpSocket::bind(address).unwrap(),
+            socket: UdpSocket::bind(address).unwrap()
         }
     }
 
 
-    pub fn start(&self) {
+    pub fn start<F>(&mut self, callback: F) where F: Fn(&Packet, &mut Packet) {
         loop {
             let mut recv_packet = Packet::new(0, 0);
             let mut resp_packet = Packet::new(0, 0);
@@ -37,6 +37,7 @@ impl Server {
             recv_packet.load_packet_from_buffer();
 
             // TODO ready packet payload, run func, pass resp_packet buffer or whole packet.
+            callback(&recv_packet, &mut resp_packet);
 
             resp_packet.write_packet_to_buffer();
             
