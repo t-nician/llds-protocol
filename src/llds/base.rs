@@ -1,3 +1,6 @@
+use std::io::Write;
+
+
 const CURRENT_PACKET_VERSION: u8 = 1;
 const DATA_SEPARATOR: u8 = 0x00;
 
@@ -38,7 +41,6 @@ impl Packet {
         let payload_len = self.payload.len();
         for (index, byte) in string.bytes().enumerate() {
             if index < payload_len {
-                println!("AA");
                 self.payload[index] = byte;
             } else {
                 panic!("YOUR STRING IS TOO BIG OMGG!");
@@ -47,16 +49,19 @@ impl Packet {
     }
 
     pub fn write_packet_to_buffer(&mut self) {
-        let mut buffer_index = 0;
-
         self.buffer.fill(0);
+
+        let mut buffer_index = 0;
+        let mut cursor = &mut self.buffer[1..];
 
         // A better way to do this I bet. :D
         // NOTE this has to be done in this order.
 
-        self.version.to_ne_bytes().map(|byte| { 
+        cursor.write(&self.version.to_ne_bytes()).unwrap();
+
+        /*self.version.to_ne_bytes().map(|byte| { 
             buffer_index += 1; self.buffer[buffer_index - 1] = byte;
-        });
+        });*/
 
         self.channel.to_ne_bytes().map(|byte| {
             buffer_index += 1; self.buffer[buffer_index - 1] = byte;
@@ -77,9 +82,13 @@ impl Packet {
         });
 
         // Now for the payload!
+
         self.payload.map(|byte| {
             buffer_index += 1; self.buffer[buffer_index - 1] = byte;
         });
+
+        //self.buffer.as_slice().clone_from_slice(cursor);
+        //self.buffer = cursor;
 
     }
 }
