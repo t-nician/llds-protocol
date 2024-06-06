@@ -48,11 +48,9 @@ impl Packet {
             return u8::from_be_bytes(u8_buffer);
         };
 
-        let mut buffer_u16_from_be_bytes = |buffer_start_index: usize| {
-            for offset in 0..1 {
-                u16_buffer[offset] = buffer[buffer_start_index + offset];
-            }   
-
+        let mut buffer_u16_from_be_bytes = |buffer_index: usize| {
+            u16_buffer[0] = buffer[buffer_index];
+            u16_buffer[1] = buffer[buffer_index + 1];
             return u16::from_be_bytes(u16_buffer);
         };
 
@@ -63,7 +61,7 @@ impl Packet {
 
         // u16 header
         packet.checksum = buffer_u16_from_be_bytes(3);
-        
+
         for (index, value) in buffer.iter().enumerate() {
             packet.buffer[index] = value.clone();
         }
