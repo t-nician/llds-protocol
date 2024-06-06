@@ -42,10 +42,9 @@ impl Packet {
 
     pub fn from_buffer(buffer: &[u8; 512]) -> Packet {
         let mut packet = Packet::new(0, 0);
+        let buffer_cursor = &mut packet.buffer;
 
-        for (index, value) in buffer.iter().enumerate() {
-            packet.buffer[index] = value.clone();
-        }
+        buffer_cursor.copy_from_slice(buffer);
 
         packet.load_packet_from_buffer();
 
@@ -93,9 +92,9 @@ impl Packet {
         let payload_len = self.payload.len();
         let payload_offset = 512 - payload_len;
 
-        for index in 0..payload_len {
-            self.payload[index] = self.buffer[index + payload_offset];
-        }
+        let mut payload_cursor = &mut self.payload[..];
+
+        payload_cursor.write(&self.buffer[payload_offset..]).unwrap();
 
         if !self.packet_checksum_valid() {
             panic!(
@@ -157,3 +156,4 @@ impl Packet {
         buffer_cursor.write(&self.payload).unwrap();
     }
 }
+

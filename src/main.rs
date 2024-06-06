@@ -16,5 +16,5 @@ fn main() {
 
     let packet_from_buffer = Packet::from_buffer(&packet.buffer);
 
-    println!("{:?}", packet_from_buffer.buffer);
+    println!("{:?}", packet_from_buffer.payload);
 }
