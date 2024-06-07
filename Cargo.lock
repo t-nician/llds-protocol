@@ -32,10 +32,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "97b3888a4aecf77e811145cadf6eef5901f4782c53886191b2f693f24761847c"
 
 [[package]]
-name = "llds-protocol"
+name = "llds"
 version = "0.1.0"
 dependencies = [
  "fletcher",
+ "rand",
+]
+
+[[package]]
+name = "llds-runner"
+version = "0.1.0"
+dependencies = [
+ "fletcher",
+ "llds",
  "rand",
 ]
 
