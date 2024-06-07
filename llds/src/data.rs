@@ -154,19 +154,19 @@ impl Packet {
             &self.id.to_string() as &str
         ];
 
-        let mut payload_out = String::new();
+        let mut payload = String::new();
         
         for byte in self.payload.iter() {
-            payload_out.push_str(&byte.to_string());
-            payload_out.push_str(" ");
+            payload.push_str(&byte.to_string());
+            payload.push_str(" ");
         }
 
-        payload_out = payload_out.trim_end().to_string();
+        payload = payload.trim_end().to_string();
 
         let mut buffer = Vec::new();
 
         text_tables::render(&mut buffer, vec![keyword_ref, number_ref]).unwrap();
-        text_tables::render(&mut buffer, vec![["Payload"], [&payload_out]]).unwrap();
+        text_tables::render(&mut buffer, vec![["Payload"], [&payload]]).unwrap();
 
         println!("{}", std::str::from_utf8(&buffer).unwrap());
     }
