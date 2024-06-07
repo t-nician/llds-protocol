@@ -1,9 +1,11 @@
+use text_tables;
+
 use std::io::Write;
 
 const PACKET_VERSION: u8 = 1;
 const HEADER_SEPARATOR: [u8; 2] = [0, 0];
 
-const HEADER_SIZE: usize = 7;
+const HEADER_SIZE: usize = 9;
 
 pub struct Packet {
     pub version: u8,
@@ -38,9 +40,6 @@ impl Packet {
             panic!("Buffer is not big enough for a header!");
         }
 
-        let mut be_buffer = [0u8; 2];
-        let mut be_cursor = &mut be_buffer[..];
-
         let mut packet = Packet {
             version: u8::from_be_bytes(buffer[0..0].try_into().unwrap()),
             size: u16::from_be_bytes(buffer[1..2].try_into().unwrap()),
@@ -52,15 +51,23 @@ impl Packet {
             payload: Vec::new()
         };
 
-        for index in 5..buffer.len() {
+        for index in 9..buffer.len() {
             packet.payload.push(buffer[index])
         }
+
+        packet.checksum_valid_or_panic();
+        packet.update_header();
 
         return packet;
     }
 
     pub fn generate_encoded_packet_vector(&self) -> Vec<u8> {
-        self.header.clone().clone_from_slice(HEADER_SEPARATOR.)
+        let mut result = self.header.clone();
+
+        result.write(&HEADER_SEPARATOR.to_vec()).unwrap();
+        result.write(&self.payload).unwrap();
+
+        return result;
     }
 
     pub fn generate_checksum(&self) -> u16 {
@@ -71,23 +78,28 @@ impl Packet {
         return checksum.value();
     }
 
+    pub fn checksum_valid_or_panic(&self) {
+        if self.checksum != self.generate_checksum() {
+            panic!("Invalid checksum generated! Something isn't right!")
+        }
+    }
+
     pub fn update_header(&mut self) {
         self.size = self.payload.len() as u16;
         self.checksum = self.generate_checksum();
 
         self.header.clear();
 
-        self.header.copy_from_slice(&self.version.to_ne_bytes()); // [0]
-        self.header.copy_from_slice(&self.size.to_ne_bytes()); // [0, 0]
-        self.header.copy_from_slice(&self.checksum.to_ne_bytes()); // [0, 0]
-        self.header.copy_from_slice(&self.channel.to_ne_bytes()); // [0]
-        self.header.copy_from_slice(&self.id.to_ne_bytes()); // [0]
+        self.header.write(&self.version.to_ne_bytes()).unwrap(); // [0]
+        self.header.write(&self.size.to_ne_bytes()).unwrap(); // [0, 0]
+        self.header.write(&self.checksum.to_ne_bytes()).unwrap(); // [0, 0]
+        self.header.write(&self.channel.to_ne_bytes()).unwrap(); // [0]
+        self.header.write(&self.id.to_ne_bytes()).unwrap(); // [0]
     }
 
     pub fn write_vector(&mut self, vector: &Vec<u8>) {
         self.payload.clear();
-        self.payload.resize(vector.len(), 0);
-        self.payload.copy_from_slice(vector);
+        self.payload.write(vector).unwrap();
 
         self.update_header();
     }
@@ -108,5 +120,32 @@ impl Packet {
         cursor.write(&self.header).unwrap();
         cursor.write(&HEADER_SEPARATOR).unwrap();
         cursor.write(&self.payload).unwrap();
+    }
+
+    pub fn println(&mut self) {
+        let keyword_ref = ["version", "size", "checksum", "channel", "id"];
+        let number_ref = [
+            &self.version.to_string() as &str,
+            &self.size.to_string() as &str,
+            &self.checksum.to_string() as &str,
+            &self.channel.to_string() as &str,
+            &self.id.to_string() as &str
+        ];
+
+        let mut payload_out = String::new();
+        
+        for byte in self.payload.iter() {
+            payload_out.push_str(&byte.to_string());
+            payload_out.push_str(" ");
+        }
+
+        payload_out = payload_out.trim_end().to_string();
+
+        let mut buffer = Vec::new();
+
+        text_tables::render(&mut buffer, vec![keyword_ref, number_ref]).unwrap();
+        text_tables::render(&mut buffer, vec![["Payload"], [&payload_out]]).unwrap();
+
+        println!("{}", std::str::from_utf8(&buffer).unwrap());
     }
 }

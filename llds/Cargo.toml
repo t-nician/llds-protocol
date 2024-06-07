@@ -9,3 +9,4 @@ description = ""
 [dependencies]
 fletcher={version = "0.3.0"}
 rand={version = "0.8.5"}
+text-tables={version="0.3.1"}

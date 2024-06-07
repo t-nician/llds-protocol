@@ -37,6 +37,7 @@ version = "0.1.0"
 dependencies = [
  "fletcher",
  "rand",
+ "text-tables",
 ]
 
 [[package]]
@@ -83,6 +84,12 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
 ]
+
+[[package]]
+name = "text-tables"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5dc41925991e82af3c3e21e25a9aad92e72930af57fbcc4b07867a18d1cd0459"
 
 [[package]]
 name = "wasi"
