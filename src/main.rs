@@ -27,8 +27,10 @@ fn main() {
     packet.write_str(&"Hello there");
     packet.write_packet_to_buffer(&mut buffer);
 
+    packet.println();
+
     let packet_from_buffer = llds::data::Packet::from_buffer(&buffer);
 
-
+    packet.println();
     
 }

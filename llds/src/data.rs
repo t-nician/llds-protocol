@@ -1,5 +1,4 @@
 use text_tables;
-
 use std::io::Write;
 
 const PACKET_VERSION: u8 = 1;
@@ -40,18 +39,36 @@ impl Packet {
             panic!("Buffer is not big enough for a header!");
         }
 
+        let mut u8_buffer = [0u8; 1];
+        let mut u16_buffer = [0u8; 2];
+
+        let mut get_u8_from_buffer = |index| {
+            u8_buffer[0] = buffer[index];
+            return u8::from_be_bytes(u8_buffer);
+        };
+
+        let mut get_u16_from_buffer = |index_a, index_b| {
+            u16_buffer[0] = buffer[index_a];
+            u16_buffer[1] = buffer[index_b];
+            return u16::from_be_bytes(u16_buffer);
+        };
+
         let mut packet = Packet {
-            version: u8::from_be_bytes(buffer[0..0].try_into().unwrap()),
-            size: u16::from_be_bytes(buffer[1..2].try_into().unwrap()),
-            checksum: u16::from_be_bytes(buffer[2..3].try_into().unwrap()),
-            channel: u8::from_be_bytes(buffer[4..4].try_into().unwrap()),
-            id: u8::from_be_bytes(buffer[5..5].try_into().unwrap()),
+            version: get_u8_from_buffer(0),
+            size: get_u16_from_buffer(1, 2),
+            checksum: get_u16_from_buffer(3, 4),
+            channel: get_u8_from_buffer(5),
+            id: get_u8_from_buffer(6),
             
             header: Vec::new(),
             payload: Vec::new()
         };
 
-        for index in 9..buffer.len() {
+        for index in HEADER_SIZE..buffer.len() {
+            if buffer[index] == 0 {
+                break;
+            }
+
             packet.payload.push(buffer[index])
         }
 
@@ -78,9 +95,14 @@ impl Packet {
         return checksum.value();
     }
 
-    pub fn checksum_valid_or_panic(&self) {
+    pub fn checksum_valid_or_panic(&mut self) {
         if self.checksum != self.generate_checksum() {
-            panic!("Invalid checksum generated! Something isn't right!")
+
+            self.println();
+            panic!(
+                "Invalid checksum!\nGenerated: {:?}",
+                self.generate_checksum()
+            )
         }
     }
 
@@ -90,11 +112,11 @@ impl Packet {
 
         self.header.clear();
 
-        self.header.write(&self.version.to_ne_bytes()).unwrap(); // [0]
-        self.header.write(&self.size.to_ne_bytes()).unwrap(); // [0, 0]
-        self.header.write(&self.checksum.to_ne_bytes()).unwrap(); // [0, 0]
-        self.header.write(&self.channel.to_ne_bytes()).unwrap(); // [0]
-        self.header.write(&self.id.to_ne_bytes()).unwrap(); // [0]
+        self.header.write(&self.version.to_be_bytes()).unwrap(); // [0]
+        self.header.write(&self.size.to_be_bytes()).unwrap(); // [0, 0]
+        self.header.write(&self.checksum.to_be_bytes()).unwrap(); // [0, 0]
+        self.header.write(&self.channel.to_be_bytes()).unwrap(); // [0]
+        self.header.write(&self.id.to_be_bytes()).unwrap(); // [0]
     }
 
     pub fn write_vector(&mut self, vector: &Vec<u8>) {
