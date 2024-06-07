@@ -1,6 +1,6 @@
 workspace = { members = ["llds"] }
 [package]
-name = "llds-runner"
+name = "llds-protocol"
 version = "0.1.0"
 edition = "2021"
 description = "A UDP based networking protocol for transmitting & receiving data as quickly as possible for various purposes."

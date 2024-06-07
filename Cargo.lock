@@ -40,7 +40,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "llds-runner"
+name = "llds-protocol"
 version = "0.1.0"
 dependencies = [
  "fletcher",
