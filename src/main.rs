@@ -1,13 +1,12 @@
-use llds::core::{Packet, Header};
+use llds::event::*;
+use llds::packet::*;
 
 fn main() {
     let mut packet = Packet::new();
-
-    packet.set_header(Header::Version, 1);
-    packet.set_header(Header::Channel, 2);
-    packet.set_header(Header::Id, 3);
-    packet.set_header(Header::Checksum, 35352);
-    packet.set_header(Header::Size, 4096);
-
-    println!("{:?}", packet.header);
+    let mut buffer: Vec<u8> = Vec::new();
+    
+    packet.write_string(&"Hello there!");
+    packet.write_packet_to_buffer(&mut buffer);
+    
+    println!("{:?}", buffer);
 }
