@@ -9,7 +9,6 @@ pub const HEADER_SIZE: usize = 7;
 pub const PAYLOAD_SIZE: usize = PACKET_SIZE - HEADER_SIZE - SEPARATOR_SIZE;
 pub const SEPARATOR_SIZE: usize = SEPARATOR.len();
 
-
 pub struct Packet {
     pub id: u8,
     pub channel: u8,
