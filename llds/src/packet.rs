@@ -39,7 +39,7 @@ impl Packet {
 
         if packet.generate_checksum().to_be_bytes() != checksum {
             panic!(
-                "Packet::from(buffer &[u8])\nPacket failed checksum!\nReceived: {:?}\nGenerated: {:?}",
+                "Packet::from(buffer &[u8])\nPacket payload failed checksum!\nReceived: {:?}\nGenerated: {:?}",
                 checksum,
                 packet.generate_checksum().to_be_bytes()
             )
