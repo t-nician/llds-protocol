@@ -3,11 +3,12 @@ use std::io::Write;
 const SEPARATOR: [u8; 2] = [0, 0];
 const PACKET_VERSION: u8 = 1;
 
-const PACKET_SIZE: u16 = 4096;
-const SEPARATOR_SIZE: u16 = SEPARATOR.len() as u16;
+pub const PACKET_SIZE: usize = 4096;
+pub const HEADER_SIZE: usize = 7;
 
-pub const HEADER_SIZE: u16 = 7;
-pub const PAYLOAD_SIZE: u16 = PACKET_SIZE - HEADER_SIZE - SEPARATOR_SIZE;
+pub const PAYLOAD_SIZE: usize = PACKET_SIZE - HEADER_SIZE - SEPARATOR_SIZE;
+pub const SEPARATOR_SIZE: usize = SEPARATOR.len();
+
 
 pub struct Packet {
     pub id: u8,
@@ -53,7 +54,7 @@ impl Packet {
     }
 
     pub fn get_packet_size(&self) -> usize {
-        return self.payload.len() + HEADER_SIZE as usize + SEPARATOR_SIZE as usize;
+        return self.payload.len() + HEADER_SIZE + SEPARATOR_SIZE;
     }
 
     pub fn generate_checksum(&self) -> u32 {
@@ -70,7 +71,7 @@ impl Packet {
     }
 
     pub fn write_string(&mut self, string: &str) {
-        if self.payload.len() + string.len() > PAYLOAD_SIZE as usize {
+        if self.payload.len() + string.len() > PAYLOAD_SIZE {
             panic!("Payload side has exceeded {:?} bytes!", PAYLOAD_SIZE)
         }
 
