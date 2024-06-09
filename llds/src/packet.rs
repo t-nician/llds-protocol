@@ -30,20 +30,16 @@ impl Packet {
         let mut packet = Packet::new();
 
         let checksum = &buffer[1..5];
-
-        let channel = &buffer[5];
-        let id = &buffer[6];
-
         let payload = &buffer[9..];
 
-        packet.id = id.clone();
+        packet.id = buffer[6].clone();
+        packet.channel = buffer[5].clone();
 
-        packet.channel = channel.clone();
         packet.payload = payload.to_vec();
 
         if packet.generate_checksum().to_be_bytes() != checksum {
             panic!(
-                "Packet::from(buffer &[u8]) failed checksum!\nGot: {:?}\nGenerated: {:?}",
+                "Packet::from(buffer &[u8])\nPacket failed checksum!\nGot: {:?}\nGenerated: {:?}",
                 checksum,
                 packet.generate_checksum().to_be_bytes()
             )
@@ -71,7 +67,7 @@ impl Packet {
 
     pub fn write_string(&mut self, string: &str) {
         if self.payload.len() + string.len() > PAYLOAD_SIZE {
-            panic!("Payload side has exceeded {:?} bytes!", PAYLOAD_SIZE)
+            panic!("Packet.write_string(string: &str)\nPayload size has exceeded {:?} bytes!", PAYLOAD_SIZE)
         }
 
         for byte in string.as_bytes() {
@@ -80,6 +76,14 @@ impl Packet {
     }
 
     pub fn write_packet_to_buffer(&self, buffer: &mut [u8]) {
+        if buffer.len() < self.get_packet_size() {
+            panic!(
+                "Packet.write_packet_to_buffer(buffer: &mut [u8])\nBuffer is not big enough to fit the packet!\nBuffer size: {:?} bytes\nPacket size: {:?} bytes",
+                buffer.len(),
+                self.get_packet_size()
+            )
+        }
+
         let mut cursor = &mut buffer[..];
 
         let _ = cursor.write(&PACKET_VERSION.to_be_bytes());
