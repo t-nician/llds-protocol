@@ -1,7 +1,7 @@
 use std::io::Write;
 
-const SEPARATOR: [u8; 2] = [0, 0];
 const PACKET_VERSION: u8 = 1;
+const SEPARATOR: [u8; 2] = [0, 0];
 
 pub const PACKET_SIZE: usize = 4096;
 pub const HEADER_SIZE: usize = 7;
@@ -39,7 +39,7 @@ impl Packet {
 
         if packet.generate_checksum().to_be_bytes() != checksum {
             panic!(
-                "Packet::from(buffer &[u8])\nPacket failed checksum!\nGot: {:?}\nGenerated: {:?}",
+                "Packet::from(buffer &[u8])\nPacket failed checksum!\nReceived: {:?}\nGenerated: {:?}",
                 checksum,
                 packet.generate_checksum().to_be_bytes()
             )
@@ -54,20 +54,24 @@ impl Packet {
 
     pub fn generate_checksum(&self) -> u32 {
         let mut checksum = fletcher::Fletcher32::new();
-        let mut u32_vector: Vec<u16> = Vec::new();
+        let mut checksum_vector: Vec<u16> = Vec::new();
 
         for byte in &self.payload {
-            u32_vector.push(byte.clone().into());
+            checksum_vector.push(byte.clone().into());
         }
 
-        checksum.update(&u32_vector);
+        checksum.update(&checksum_vector);
 
         return checksum.value();
     }
 
     pub fn write_string(&mut self, string: &str) {
         if self.payload.len() + string.len() > PAYLOAD_SIZE {
-            panic!("Packet.write_string(string: &str)\nPayload size has exceeded {:?} bytes!", PAYLOAD_SIZE)
+            panic!(
+                "Packet.write_string(string: &str)\nPayload size has exceeded {:?} bytes!\nPayload size: {:?}", 
+                PAYLOAD_SIZE,
+                self.payload.len() + string.len()
+            )
         }
 
         for byte in string.as_bytes() {
