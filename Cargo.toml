@@ -9,4 +9,6 @@ description =  "A UDP based data transmission protocol for transmitting & receiv
 [dependencies]
 fletcher={version = "0.3.0"}
 rand={version = "0.8.5"}
-text-tables={version="0.3.1"}
+text-tables={version = "0.3.1"}
+strum="0.26.2"
+strum_macros="0.26.2"

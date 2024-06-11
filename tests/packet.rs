@@ -1,12 +1,19 @@
-/*#[test]
-fn it_adds_two() {
-    assert_eq!(4, 4);
-}*/
-
+use strum::IntoEnumIterator;
 use llds::packet::{Packet, Type};
 
 #[test]
-fn test() {
-    println!("Test");
-    assert_eq!(1, 1);
+fn packets_made_with_type_are_assigned_type() {
+    for packet_type in Type::iter() {
+        assert_eq!(
+            Packet::new(
+                packet_type
+            ).r#type, 
+
+            packet_type
+        );
+    }
 }
+
+
+
+

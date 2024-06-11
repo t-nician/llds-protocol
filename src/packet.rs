@@ -1,3 +1,6 @@
+use strum_macros::EnumIter;
+
+#[derive(Debug, EnumIter, Clone, Copy, PartialEq)]
 pub enum Type {
     Receiving,
     Status,
@@ -24,5 +27,13 @@ impl Packet {
 
             payload: Vec::new()
         }
+    }
+
+    pub fn from(buffer: &[u8]) -> Self {
+        let mut packet = Packet::new(Type::Receiving);
+
+        
+
+        return packet;
     }
 }
