@@ -1,5 +1,6 @@
 # LLDS(Low Latency Data Stream)
-A UDP based networking protocol for transmitting & receiving data as quickly as possible for various purposes.
+A UDP based data transmission protocol for transmitting & receiving data as quickly as possible.
+File transfers, video streaming, etc,.
 
 ---
 

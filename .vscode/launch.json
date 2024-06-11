@@ -7,35 +7,17 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'llds-protocol'",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--bin=llds-protocol",
-                    "--package=llds-protocol"
-                ],
-                "filter": {
-                    "name": "llds-protocol",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'llds-protocol'",
+            "name": "Debug unit tests in library 'llds'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=llds-protocol",
-                    "--package=llds-protocol"
+                    "--lib",
+                    "--package=llds"
                 ],
                 "filter": {
-                    "name": "llds-protocol",
-                    "kind": "bin"
+                    "name": "llds",
+                    "kind": "lib"
                 }
             },
             "args": [],
